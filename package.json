@@ -1,0 +1,30 @@
+{
+  "name": "rls-tutorial",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "@types/react": "^18.0.14",
+    "ava": "^4.3.0",
+    "esbuild": "^0.14.47",
+    "esbuild-register": "^3.3.3",
+    "esbuild-runner": "^2.2.1",
+    "next": "^12.1.6",
+    "nextjs-ava-fixture": "^1.2.2",
+    "react": "^18.2.0",
+    "typescript": "^4.7.4"
+  },
+  "dependencies": {
+    "@chakra-ui/react": "^2.2.1",
+    "@emotion/react": "^11.9.3",
+    "@emotion/styled": "^11.9.3",
+    "@uiw/react-textarea-code-editor": "^2.0.2",
+    "framer-motion": "^6.3.12",
+    "next-remove-imports": "^1.0.6",
+    "pg": "^8.7.3",
+    "pgtui": "^1.5.0",
+    "react-dom": "^18.2.0",
+    "react-query": "^3.39.1"
+  }
+}
