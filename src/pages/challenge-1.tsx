@@ -34,8 +34,14 @@ export default () => {
                 "Should be able to get the current user of the session",
               sql: "SELECT current_setting('app.user') as current_user;",
               test: (result) => {
-                console.log({ result })
                 return result.rows.length === 1
+              },
+            },
+            {
+              description: "John should only be able to access 2 rows",
+              sql: "SELECT * FROM transactions;",
+              test: (result) => {
+                return result.rows.length === 21
               },
             },
           ]}
