@@ -18,7 +18,12 @@ export default () => {
       </Chakra.Text>
       <Chakra.Box pt={2}>
         <Challenge
-          prefixCode={"SELECT set_config('app.user', 'john', false)\n"}
+          prefixCode={"SELECT set_config('app.user', 'john', false);\n"}
+          startingCode={`
+          CREATE POLICY transactions_policy ON transactions
+            USING (
+              from_user = current_setting('session_user')
+            );`}
           schemaSQL={`
             CREATE TABLE transactions (from_user text, to_user text, amount numeric);
 
@@ -27,6 +32,9 @@ export default () => {
               ('john', 'jessica', 50),
               ('sarah', 'jessica', 30),
               ('karl', 'craig', 25);
+
+            ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
+            ALTER TABLE transactions FORCE ROW LEVEL SECURITY;
             `}
           tests={[
             {

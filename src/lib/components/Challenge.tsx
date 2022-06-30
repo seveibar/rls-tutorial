@@ -4,10 +4,12 @@ import * as Chakra from "@chakra-ui/react"
 import { useQuery } from "react-query"
 import stripIndent from "strip-indent"
 import axios from "axios"
+import { useDebounce } from "use-debounce"
 
 interface Props {
   schemaSQL: string
   prefixCode: string
+  startingCode: string
   tests: Array<{
     description: string
     sql: string
@@ -16,22 +18,13 @@ interface Props {
 }
 
 export const Challenge = (props: Props) => {
-  const [userCode, setUserCode] = useState(
-    stripIndent(`
-
-  ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
-
-  CREATE POLICY transactions_policy ON transactions
-    USING (
-      from_user = current_setting('session_user')
-    );
-  
-  `)
-  )
-  const query = useQuery(["challenge1_sql", userCode], async () => {
+  const [userCode, setUserCode] = useState(stripIndent(props.startingCode))
+  const userCodeDebounced = useDebounce(userCode, 500)
+  const query = useQuery(["challenge1_sql", userCodeDebounced], async () => {
     const eval_sql = [props.schemaSQL, props.prefixCode, userCode].filter(
       Boolean
     )
+    const user_code_index = eval_sql.length - 1
     const test_index_start = eval_sql.length
     eval_sql.push(...props.tests.map((t) => t.sql))
     const res = await axios.post("/api/database/run", { eval_sql })
@@ -45,6 +38,7 @@ export const Challenge = (props: Props) => {
       eval_sql,
       error_index,
       test_index_start,
+      user_code_result: eval_results[user_code_index],
       test_results,
       test_status: props.tests.map((t, i) => {
         try {
@@ -58,19 +52,6 @@ export const Challenge = (props: Props) => {
   })
   return (
     <Chakra.Box>
-      {query.data && query.data.has_error && (
-        <Chakra.Alert status="error">
-          <Chakra.AlertIcon />
-          <Chakra.AlertTitle>SQL Error!</Chakra.AlertTitle>
-          <Chakra.AlertDescription>
-            <b>{query.data.eval_results[query.data.error_index].error}</b>
-            <br />
-            <Chakra.Text fontSize="sm">
-              Caused by: {query.data.eval_sql[query.data.error_index]}
-            </Chakra.Text>
-          </Chakra.AlertDescription>
-        </Chakra.Alert>
-      )}
       <Chakra.Tabs>
         <Chakra.TabList>
           <Chakra.Tab>Schema SQL</Chakra.Tab>
@@ -95,8 +76,54 @@ export const Challenge = (props: Props) => {
           </Chakra.TabPanel>
         </Chakra.TabPanels>
       </Chakra.Tabs>
+      {query.data && query.data.has_error && (
+        <Chakra.Alert status="error">
+          <Chakra.AlertIcon />
+          <Chakra.AlertTitle>SQL Error!</Chakra.AlertTitle>
+          <Chakra.AlertDescription>
+            <b>{query.data.eval_results[query.data.error_index].error}</b>
+            <br />
+            <Chakra.Text fontSize="sm">
+              Caused by: {query.data.eval_sql[query.data.error_index]}
+            </Chakra.Text>
+          </Chakra.AlertDescription>
+        </Chakra.Alert>
+      )}
       <Chakra.Box>
         <Chakra.Accordion allowToggle allowMultiple>
+          <Chakra.AccordionItem key="output">
+            <Chakra.AccordionButton>
+              <Chakra.Text sx={{ textAlign: "left" }} flexGrow={1}>
+                Output
+              </Chakra.Text>
+              <Chakra.AccordionIcon />
+            </Chakra.AccordionButton>
+            <Chakra.AccordionPanel>
+              <CodeEditor
+                readonly
+                language="js"
+                key={query.data?.user_code_result}
+                code={(() => {
+                  try {
+                    if (!query.data?.user_code_result?.map) {
+                      return JSON.stringify(
+                        query.data?.user_code_result?.rows,
+                        null,
+                        "  "
+                      )
+                    }
+                    return JSON.stringify(
+                      query.data?.user_code_result?.map((r) => r.rows),
+                      null,
+                      "  "
+                    )
+                  } catch (e) {
+                    return e.toString()
+                  }
+                })()}
+              />
+            </Chakra.AccordionPanel>
+          </Chakra.AccordionItem>
           {props.tests.map((t, i) => (
             <Chakra.AccordionItem key={i}>
               <Chakra.AccordionButton>
