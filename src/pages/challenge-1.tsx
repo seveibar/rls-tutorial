@@ -2,6 +2,7 @@ import { useState } from "react"
 import * as Chakra from "@chakra-ui/react"
 import CodeEditor from "../lib/components/CodeEditor"
 import { Challenge } from "../lib/components/Challenge"
+import stripIndent from "strip-indent"
 
 export default () => {
   return (
@@ -16,7 +17,29 @@ export default () => {
         transaction.
       </Chakra.Text>
       <Chakra.Box pt={2}>
-        <Challenge />
+        <Challenge
+          prefixCode={"SELECT set_config('app.user', 'john', false)\n"}
+          schemaSQL={`
+            CREATE TABLE transactions (from_user text, to_user text, amount numeric);
+
+            INSERT INTO transactions (from_user, to_user, amount) VALUES
+              ('sarah', 'john', 20),
+              ('john', 'jessica', 50),
+              ('sarah', 'jessica', 30),
+              ('karl', 'craig', 25);
+            `}
+          tests={[
+            {
+              description:
+                "Should be able to get the current user of the session",
+              sql: "SELECT current_setting('app.user') as current_user;",
+              test: (result) => {
+                console.log({ result })
+                return result.rows.length === 1
+              },
+            },
+          ]}
+        />
       </Chakra.Box>
     </Chakra.Container>
   )

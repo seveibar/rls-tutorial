@@ -1,9 +1,14 @@
 import { ChakraProvider } from "@chakra-ui/react"
+import { QueryClient, QueryClientProvider } from "react-query"
+
+export const queryClient = new QueryClient()
 
 export const MyApp = ({ Component, pageProps }: any) => {
   return (
     <ChakraProvider>
-      <Component {...pageProps} />
+      <QueryClientProvider client={queryClient}>
+        <Component {...pageProps} />
+      </QueryClientProvider>
     </ChakraProvider>
   )
 }
