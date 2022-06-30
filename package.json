@@ -26,6 +26,7 @@
     "pg": "^8.7.3",
     "pg-connection-string": "^2.5.0",
     "pg-format": "^1.0.4",
+    "pg-structure": "^7.13.0",
     "pgtui": "^1.5.0",
     "react-dom": "^18.2.0",
     "react-query": "^3.39.1"

@@ -12,7 +12,7 @@
  */
 
 import * as pg from "pg"
-import pgFormat from "pg-format"
+import pgStructure from "pg-structure"
 import { parse as parseConnectionString } from "pg-connection-string"
 
 export default async (req, res) => {
@@ -35,15 +35,17 @@ export default async (req, res) => {
   )
   await superclient.query(`CREATE DATABASE ${testDbName} OWNER ${testRole};`)
 
-  const connectionParams = parseConnectionString(process.env.DATABASE_URL)
+  const superConnectionParams = parseConnectionString(process.env.DATABASE_URL)
 
-  const sandboxed_client = new pg.Client({
-    ...connectionParams,
+  const sandboxedClientConnectionParams: any = {
+    ...superConnectionParams,
     database: testDbName,
     user: testRole,
     password: iid,
-  } as any)
-  await sandboxed_client.connect()
+  }
+
+  const sandboxclient = new pg.Client(sandboxedClientConnectionParams)
+  await sandboxclient.connect()
 
   const eval_results = []
   let has_error = false
@@ -51,7 +53,7 @@ export default async (req, res) => {
   console.log(`Running eval_sql...`)
   try {
     for (const eval_sql_line of eval_sql) {
-      eval_results.push(await sandboxed_client.query(eval_sql_line))
+      eval_results.push(await sandboxclient.query(eval_sql_line))
     }
   } catch (e) {
     eval_results.push({
@@ -59,12 +61,20 @@ export default async (req, res) => {
     })
     has_error = true
   }
-  await sandboxed_client.end()
+  await sandboxclient.end()
+
+  const dbStructure = JSON.parse(
+    (
+      await pgStructure(sandboxedClientConnectionParams, {
+        includeSchemas: ["public"],
+      })
+    ).serialize()
+  )
 
   await superclient.query(`DROP DATABASE ${testDbName};`)
   await superclient.query(`DROP OWNED BY ${testRole} CASCADE;`)
   await superclient.query(`DROP ROLE ${testRole};`)
   await superclient.end()
 
-  res.status(200).json({ eval_results, has_error })
+  res.status(200).json({ eval_results, has_error, db_structure: dbStructure })
 }
