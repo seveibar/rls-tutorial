@@ -20,6 +20,7 @@ export default async (req, res) => {
     eval_sql: string[]
   }
 
+  const superConnectionParams = parseConnectionString(process.env.DATABASE_URL)
   const superclient = new pg.Client({
     connectionString: process.env.DATABASE_URL,
   })
@@ -34,8 +35,6 @@ export default async (req, res) => {
     `CREATE ROLE ${testRole} WITH LOGIN PASSWORD '${iid}';`
   )
   await superclient.query(`CREATE DATABASE ${testDbName} OWNER ${testRole};`)
-
-  const superConnectionParams = parseConnectionString(process.env.DATABASE_URL)
 
   const sandboxedClientConnectionParams: any = {
     ...superConnectionParams,

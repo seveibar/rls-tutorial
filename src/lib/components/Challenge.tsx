@@ -103,7 +103,8 @@ export const Challenge = (props: Props) => {
         <Chakra.Accordion allowToggle allowMultiple>
           <Chakra.AccordionItem key="output">
             <Chakra.AccordionButton>
-              <Chakra.Text sx={{ textAlign: "left" }} flexGrow={1}>
+              {query.isLoading ? <Chakra.Spinner></Chakra.Spinner> : null}
+              <Chakra.Text pl={4} sx={{ textAlign: "left" }} flexGrow={1}>
                 Output
               </Chakra.Text>
               <Chakra.AccordionIcon />

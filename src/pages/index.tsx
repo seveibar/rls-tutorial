@@ -21,7 +21,7 @@ export default () => {
         surface of database interactions in tests is much easier than covering
         the surface of API interactions.
       </Chakra.Text>
-      <Chakra.Box pt={4}>
+      <Chakra.Flex direction={"column"} pt={4}>
         <Chakra.Link sx={{ color: "blue" }} href="/challenge-1">
           Challenge 1: The Basics
         </Chakra.Link>
@@ -31,7 +31,7 @@ export default () => {
         <Chakra.Link sx={{ color: "blue" }} href="/challenge-1">
           Challenge 3: RLS for an API
         </Chakra.Link>
-      </Chakra.Box>
+      </Chakra.Flex>
     </Chakra.Container>
   )
 }
