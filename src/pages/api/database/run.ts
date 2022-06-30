@@ -4,19 +4,67 @@
  * to the newly created database), execute the run_sql, then evaluate each of the eval_sqls,
  * (collecting the output of each one to return), then destroy the role and the database.
  *
- * We use this to test SQL. The run_sql is filled with CREATE TABLE and INSERTs, then the
- * eval_sql allows you to look at the result of different queries.
+ * We use this to test SQL. The first eval_sql commands usually have CREATE
+ * TABLEs and INSERTs, then the remaining eval_sql allows you to look at the
+ * result of different queries.
  *
  * As a bonus, this endpoint also returns a pgtui JSON tree of the created database.
  */
 
 import * as pg from "pg"
+import pgFormat from "pg-format"
+import { parse as parseConnectionString } from "pg-connection-string"
 
 export default async (req, res) => {
-  const { run_sql, eval_sql } = req.body as { run_sql: string, eval_sql: string[] }
+  const { eval_sql } = req.body as {
+    eval_sql: string[]
+  }
 
-  const client = new pg.Client({
+  const superclient = new pg.Client({
     connectionString: process.env.DATABASE_URL,
   })
-  await client.connect()
+  await superclient.connect()
+
+  // invocation id
+  const iid = Math.random().toString(32).slice(2, 14)
+  const testDbName = `testdb_${iid}`
+  const testRole = `testrole_${iid}`
+
+  await superclient.query(
+    `CREATE ROLE ${testRole} WITH LOGIN PASSWORD '${iid}';`
+  )
+  await superclient.query(`CREATE DATABASE ${testDbName} OWNER ${testRole};`)
+
+  const connectionParams = parseConnectionString(process.env.DATABASE_URL)
+
+  const sandboxed_client = new pg.Client({
+    ...connectionParams,
+    database: testDbName,
+    user: testRole,
+    password: iid,
+  } as any)
+  await sandboxed_client.connect()
+
+  const eval_results = []
+  let has_error = false
+
+  console.log(`Running eval_sql...`)
+  try {
+    for (const eval_sql_line of eval_sql) {
+      eval_results.push(await sandboxed_client.query(eval_sql_line))
+    }
+  } catch (e) {
+    eval_results.push({
+      error: e.toString(),
+    })
+    has_error = true
+  }
+  await sandboxed_client.end()
+
+  await superclient.query(`DROP DATABASE ${testDbName};`)
+  await superclient.query(`DROP OWNED BY ${testRole} CASCADE;`)
+  await superclient.query(`DROP ROLE ${testRole};`)
+  await superclient.end()
+
+  res.status(200).json({ eval_results, has_error })
 }

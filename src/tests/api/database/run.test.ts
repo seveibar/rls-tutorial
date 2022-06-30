@@ -5,8 +5,11 @@ test("should be able to run sql", async (t) => {
   const { axios } = await fixture(t)
 
   const { data } = await axios.post("/api/database/run", {
-    run_sql: `CREATE TABLE people (id serial PRIMARY KEY, name text);`,
-    eval_sql: [`SELECT 1`],
+    eval_sql: [
+      `CREATE TABLE people (id serial PRIMARY KEY, name text);`,
+      `INSERT INTO people (name) VALUES ('@seveibar');`,
+      `SELECT * FROM people;`,
+    ],
   })
 
   console.log(data)
