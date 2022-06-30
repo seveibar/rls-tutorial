@@ -1,8 +1,5 @@
-import { useState } from "react"
 import * as Chakra from "@chakra-ui/react"
-import CodeEditor from "../lib/components/CodeEditor"
 import { Challenge } from "../lib/components/Challenge"
-import stripIndent from "strip-indent"
 
 export default () => {
   return (
@@ -11,18 +8,18 @@ export default () => {
         Postgres RLS Challenge 1: The Basics
       </Chakra.Heading>
       <Chakra.Text fontSize="sm" mt={4}>
-        Take a look at the schema below. Our database has two roles, superadmin
-        and john. We want to make sure that the john can only access rows of the
-        transactions table where he was one of the parties involved in the
-        transaction.
+        Take a look at the schema below. We want to make sure that the john can
+        only access rows of the transactions table where he was one of the
+        parties involved in the transaction.
       </Chakra.Text>
       <Chakra.Box pt={2}>
         <Challenge
+          nextChallengeUrl="/challenge-2"
           prefixCode={"SELECT set_config('app.user', 'john', false);\n"}
           startingCode={`
           CREATE POLICY transactions_policy ON transactions
             USING (
-              from_user = current_setting('session_user')
+              from_user = current_setting('app.user')
             );`}
           schemaSQL={`
             CREATE TABLE transactions (from_user text, to_user text, amount numeric);
@@ -49,7 +46,7 @@ export default () => {
               description: "John should only be able to access 2 rows",
               sql: "SELECT * FROM transactions;",
               test: (result) => {
-                return result.rows.length === 21
+                return result.rows.length === 2
               },
             },
           ]}

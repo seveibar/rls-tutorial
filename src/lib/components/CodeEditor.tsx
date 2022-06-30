@@ -40,7 +40,7 @@ export default ({
       padding={15}
       style={{
         fontSize: 12,
-        backgroundColor: "#1e1e1e",
+        backgroundColor: "#f5f5f5",
         fontFamily:
           "ui-monospace,SFMono-Regular,SF Mono,Consolas,Liberation Mono,Menlo,monospace",
       }}

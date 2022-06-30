@@ -10,6 +10,7 @@ interface Props {
   schemaSQL: string
   prefixCode: string
   startingCode: string
+  nextChallengeUrl: string
   tests: Array<{
     description: string
     sql: string
@@ -56,7 +57,7 @@ export const Challenge = (props: Props) => {
         <Chakra.TabList>
           <Chakra.Tab>Schema SQL</Chakra.Tab>
           {/* <Chakra.Tab>Schema</Chakra.Tab> */}
-          <Chakra.Tab>Editor</Chakra.Tab>
+          <Chakra.Tab>Challenge Editor</Chakra.Tab>
         </Chakra.TabList>
         <Chakra.TabPanels>
           <Chakra.TabPanel>
@@ -69,10 +70,19 @@ export const Challenge = (props: Props) => {
               code={userCode}
               onChange={(userCode) => setUserCode(userCode)}
             />
-            {/* <Chakra.Flex pt={2}>
-              <Chakra.Box flexGrow={1} />
-              <Chakra.Button colorScheme="green">Run</Chakra.Button>
-            </Chakra.Flex> */}
+            {query.data?.test_status?.every(Boolean) && (
+              <Chakra.Flex pt={2}>
+                <Chakra.Box flexGrow={1} />
+                <Chakra.Button
+                  onClick={() =>
+                    (window.location.href = props.nextChallengeUrl)
+                  }
+                  colorScheme="green"
+                >
+                  Success! Next Challenge
+                </Chakra.Button>
+              </Chakra.Flex>
+            )}
           </Chakra.TabPanel>
         </Chakra.TabPanels>
       </Chakra.Tabs>
@@ -152,11 +162,21 @@ export const Challenge = (props: Props) => {
                   readonly
                   language="js"
                   key={query.data?.test_results?.[i]}
-                  code={JSON.stringify(
-                    query.data?.test_results?.[i]?.rows,
-                    null,
-                    "  "
-                  )}
+                  code={(() => {
+                    try {
+                      const result = query.data?.test_results?.[i]
+                      if (!result) return ""
+                      if (result.rows)
+                        return JSON.stringify(result.rows, null, "  ")
+                      return JSON.stringify(
+                        result[result.length - 1].rows,
+                        null,
+                        "  "
+                      )
+                    } catch (e) {
+                      return
+                    }
+                  })()}
                 />
               </Chakra.AccordionPanel>
             </Chakra.AccordionItem>
