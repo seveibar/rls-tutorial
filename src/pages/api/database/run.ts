@@ -63,13 +63,16 @@ export default async (req, res) => {
   }
   await sandboxclient.end()
 
-  const dbStructure = JSON.parse(
-    (
-      await pgStructure(sandboxedClientConnectionParams, {
-        includeSchemas: ["public"],
-      })
-    ).serialize()
-  )
+  // This output is difficult to parse w/o deserializing, might not work in
+  // browser
+  // const dbStructure = JSON.parse(
+  //   (
+  //     await pgStructure(sandboxedClientConnectionParams, {
+  //       includeSchemas: ["public"],
+  //     })
+  //   ).serialize()
+  // )
+  const dbStructure = {}
 
   await superclient.query(`DROP DATABASE ${testDbName};`)
   await superclient.query(`DROP OWNED BY ${testRole} CASCADE;`)

@@ -25,6 +25,12 @@ export default () => {
         <Chakra.Link sx={{ color: "blue" }} href="/challenge-1">
           Challenge 1: The Basics
         </Chakra.Link>
+        <Chakra.Link sx={{ color: "blue" }} href="/challenge-2">
+          Challenge 2: Complex Policies
+        </Chakra.Link>
+        <Chakra.Link sx={{ color: "blue" }} href="/challenge-1">
+          Challenge 3: RLS for an API
+        </Chakra.Link>
       </Chakra.Box>
     </Chakra.Container>
   )

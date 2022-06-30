@@ -32,7 +32,7 @@ export default () => {
   return (
     <Chakra.Container pt={8}>
       <Chakra.Heading size="lg">
-        Postgres RLS Challenge 2: Complex Subqueries
+        Postgres RLS Challenge 2: Complex Policies
       </Chakra.Heading>
       <Chakra.Text fontSize="sm" mt={4}>
         Row Level Security policies can have complex joining operations. Here we
