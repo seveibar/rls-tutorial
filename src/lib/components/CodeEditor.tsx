@@ -2,7 +2,7 @@ import { useState } from "react"
 import dynamic from "next/dynamic"
 import "@uiw/react-textarea-code-editor/dist.css"
 
-const CodeEditor = dynamic(
+const CodeEditor: any = dynamic(
   () => import("@uiw/react-textarea-code-editor").then((mod) => mod.default),
   { ssr: false }
 )
